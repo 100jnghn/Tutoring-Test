@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public GameObject firePos;
+    public GameObject bullet;
+
     void Start()
     {
     
@@ -44,8 +47,15 @@ public class Player : MonoBehaviour
         {
             transform.LookAt(transform.position + dir);
         }
+
+
+
+
+        // 스페이스바 누르면
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Instantiate(bullet, firePos.transform);
+        }
     }
-
-
 
 }
