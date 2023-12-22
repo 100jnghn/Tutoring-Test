@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public int hp = 100; // 플레이어 체력
+    public int weaponPower = 5; // 발사 무기 공격력
+
     public float rotSpeed = 200f; // 회전 속도
     public float moveSpeed = 7f; // 이동 속도
     public float jumpPower = 10f; // 점프에 가해지는 힘
@@ -129,16 +132,33 @@ public class Player : MonoBehaviour
             // ray가 부딪힌 물체가 있다면
             if (Physics.Raycast(ray, out hitInfo))
             {
-                // 피격 이펙트의 위치를 ray가 부딪힌 위치로 설정
-                bulletEffect.transform.position = hitInfo.point;
+                // 레이에 부딪힌 대상의 Layer가 'Enemy'
+                if (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+                {
+                    // 에너미 피격 실행
+                    Enemy enemy = hitInfo.transform.GetComponent<Enemy>();
+                    enemy.hitEnemy(weaponPower);
+                }
 
-                // 피격 이펙트의 forward 방향을 ray가 부딪힌 지점의 법선 벡터와 일치시킴
-                // 이펙트 생성 방향을 맞춰준다
-                bulletEffect.transform.forward = hitInfo.normal;
+                else
+                {
+                    // 피격 이펙트의 위치를 ray가 부딪힌 위치로 설정
+                    bulletEffect.transform.position = hitInfo.point;
 
-                // 피격 이펙트 play
-                ps.Play();
+                    // 피격 이펙트의 forward 방향을 ray가 부딪힌 지점의 법선 벡터와 일치시킴
+                    // 이펙트 생성 방향을 맞춰준다
+                    bulletEffect.transform.forward = hitInfo.normal;
+
+                    // 피격 이펙트 play
+                    ps.Play();
+                }
             }
         }
+    }
+
+    // 플레이어 피격 함수
+    public void damagedAction(int damage)
+    {
+        hp -= damage;
     }
 }
