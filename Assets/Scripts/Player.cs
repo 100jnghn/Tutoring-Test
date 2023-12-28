@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     public int hp = 100; // 플레이어 체력
+    public int maxHP = 100; // 플레이어 최대 체력
     public int weaponPower = 5; // 발사 무기 공격력
 
     public float rotSpeed = 200f; // 회전 속도
@@ -21,6 +23,9 @@ public class Player : MonoBehaviour
     public GameObject firePosition; // 발사 위치
     public GameObject bombFactory; // 폭탄 오브젝트
     public GameObject bulletEffect; // 총알 피격 이펙트
+    public GameObject hitEffect; // 피격 효과 UI 오브젝트
+
+    public Slider hpSlider; // hp 슬라이더 변수
 
     public ParticleSystem ps; // 피격 이펙트 파티클 시스템
 
@@ -37,6 +42,13 @@ public class Player : MonoBehaviour
         doMove(); // WASD로 플레이어 이동
         doJump(); // Spacebar로 점프
         doFire(); // 마우스 입력으로 무기 사용
+        doSetHP(); // hp UI 관리
+    }
+
+    // UI - HP 관리
+    void doSetHP()
+    {
+        hpSlider.value = (float)hp / (float)maxHP;
     }
 
     // 마우스 회전에 따른 플레이어 회전
@@ -160,5 +172,24 @@ public class Player : MonoBehaviour
     public void damagedAction(int damage)
     {
         hp -= damage;
+        
+        // 체력이 아직 남아있으면 피격 효과 실행
+        if (hp > 0)
+        {
+            StartCoroutine(playerHitEffect());
+        }
+    }
+
+    // 피격 효과 코루틴
+    IEnumerator playerHitEffect()
+    {
+        // 피격 UI 활성화
+        hitEffect.SetActive(true);
+
+        // 0.3초간 대기
+        yield return new WaitForSeconds(0.3f);
+
+        // 피격 UI 비활성화
+        hitEffect.SetActive(false);
     }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using UnityEngine;
-using UnityEngine.XR;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
@@ -25,8 +25,10 @@ public class Enemy : MonoBehaviour
 
     public GameObject player; // 플레이어 오브젝트
 
+    public Slider hpSlider; // 에너미 hp 슬라이더 변수
+
     public int hp = 15; // 에너미 현재 체력
-    public int maxHp = 15; // 에너미 최대 체력
+    public int maxHP = 15; // 에너미 최대 체력
     public int attackPower = 3; // 에너미 공격력
 
     public float findDistance = 8f; // 플레이어 발견 범위
@@ -48,6 +50,7 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         doCheckState();
+        doSetHP();
     }
 
     // 상태를 체크하고 해당 상태를 변수에 저장
@@ -161,7 +164,7 @@ public class Enemy : MonoBehaviour
         else
         {
             transform.position = originPos;
-            hp = maxHp; // 체력 회복
+            hp = maxHP; // 체력 회복
             mState = EnemyState.Idle; // 기본 상태로 전환
 
             Debug.Log("상태 전환 Return -> " + mState);
@@ -234,5 +237,11 @@ public class Enemy : MonoBehaviour
 
         Debug.Log("Enemy Die");
         Destroy(gameObject);
+    }
+
+    // UI - HP 관리
+    void doSetHP()
+    {
+        hpSlider.value = (float)hp / (float)maxHP;
     }
 }
