@@ -38,6 +38,12 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        // 게임이 Run 상태가 아니면 플레이어 조작 제한
+        if (GameManager.gm.gState != GameManager.GameState.Run)
+        {
+            return;
+        }
+
         doRotate(); // 마우스로 플레이어 회전
         doMove(); // WASD로 플레이어 이동
         doJump(); // Spacebar로 점프
