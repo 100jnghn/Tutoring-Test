@@ -20,12 +20,15 @@ public class Enemy : MonoBehaviour
     public EnemyState mState; // 상태를 저장할 변수
 
     private Vector3 originPos; // 초기 위치 저장 변수
+    private Quaternion originRot; // 초기 회전값 저장 변수
 
     public CharacterController cc; // 캐릭터 컨트롤러 컴포넌트
 
     public GameObject player; // 플레이어 오브젝트
 
     public Slider hpSlider; // 에너미 hp 슬라이더 변수
+
+    private Animator anim; // 애니메이터
 
     public int hp = 15; // 에너미 현재 체력
     public int maxHP = 15; // 에너미 최대 체력
@@ -45,6 +48,8 @@ public class Enemy : MonoBehaviour
         mState = EnemyState.Idle;
         cc = GetComponent<CharacterController>();
         originPos = transform.position;
+        originRot = transform.rotation;
+        anim = transform.GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -92,6 +97,9 @@ public class Enemy : MonoBehaviour
         {
             mState = EnemyState.Move; // 이동 상태로 전환
             Debug.Log("상태 전환 Idle -> " +  mState);
+
+            // 이동 애니메이션으로 전환
+            anim.SetTrigger("IdleToMove");
         }
     }
 
@@ -114,6 +122,9 @@ public class Enemy : MonoBehaviour
 
             // 플레이어에게 이동
             cc.Move(dir * moveSpeed * Time.deltaTime);
+
+            // 플레이어를 바라본다
+            transform.forward = dir;
         }
 
         // 그렇지 않으면 현재 상태를 공격으로 전환
@@ -121,6 +132,12 @@ public class Enemy : MonoBehaviour
         {
             mState = EnemyState.Attack;
             Debug.Log("상태 전환 Move -> " + mState);
+
+            // 누적 시간을 공격 딜레이 시간만큼 진행시켜 놓는다
+            currentTime = attackDelay;
+
+            // 공격 대기 애니메이션 플레이
+            anim.SetTrigger("MoveToAttackDelay");
         }
     }
 
@@ -158,16 +175,24 @@ public class Enemy : MonoBehaviour
         {
             Vector3 dir = (originPos - transform.position).normalized;
             cc.Move(dir * moveSpeed * Time.deltaTime);
+
+            // 방향을 복귀 지점으로
+            transform.forward = dir;
         }
 
         // 현재 위치가 초기 위치라면 (복귀 완료)
         else
         {
             transform.position = originPos;
+            transform.rotation = originRot;
+
             hp = maxHP; // 체력 회복
             mState = EnemyState.Idle; // 기본 상태로 전환
 
             Debug.Log("상태 전환 Return -> " + mState);
+
+            // 대기 애니메이션으로 전환
+            anim.SetTrigger("MoveToIdle");
         }
     }
 
