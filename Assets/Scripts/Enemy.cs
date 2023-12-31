@@ -153,8 +153,11 @@ public class Enemy : MonoBehaviour
             {
                 Debug.Log("Enemy가 Player 공격");
 
-                player.GetComponent<Player>().damagedAction(attackPower);
+                //player.GetComponent<Player>().damagedAction(attackPower);
                 currentTime = 0;
+
+                // 공격 애니메이션 플레이
+                anim.SetTrigger("StartAttack");
             }
         }
 
@@ -164,7 +167,16 @@ public class Enemy : MonoBehaviour
             mState = EnemyState.Move;
             Debug.Log("상태 전환 Attack -> " + mState);
             currentTime = 0;
+
+            // 이동 애니메이션 플레이
+            anim.SetTrigger("AttackToMove");
         }
+    }
+
+    // 플레이어 스크립트의 데미지 처리 함수 실행하는 함수
+    public void attackAction()
+    {
+        player.GetComponent<Player>().damagedAction(attackPower);
     }
 
     // 복귀 상태
@@ -228,6 +240,10 @@ public class Enemy : MonoBehaviour
         {
             mState = EnemyState.Damaged;
             Debug.Log("상태 전환 Any State -> " + mState);
+
+            // 피격 애니메이션 재생
+            anim.SetTrigger("Damaged");
+
             doDamaged();
         }
 
@@ -236,6 +252,10 @@ public class Enemy : MonoBehaviour
         {
             mState = EnemyState.Die;
             Debug.Log("상태 전환 Any State -> " + mState);
+
+            // Die 애니메이션 재생
+            anim.SetTrigger("Die");
+
             doDie();
         }
     }
@@ -244,7 +264,7 @@ public class Enemy : MonoBehaviour
     IEnumerator damageProcess()
     {
         // 피격 모션만큼 기다린다
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
 
         // 현재 상태를 이동 상태로 전환
         mState = EnemyState.Move;
