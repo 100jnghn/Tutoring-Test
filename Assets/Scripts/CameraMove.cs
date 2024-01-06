@@ -19,6 +19,12 @@ public class CameraMove : MonoBehaviour
 
     void Update()
     {
+        // 게임이 Run 상태가 아니면 플레이어 조작 제한
+        if (GameManager.gm.gState != GameManager.GameState.Run)
+        {
+            return;
+        }
+
         camfollow();
         camMove();
     }

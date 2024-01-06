@@ -30,10 +30,12 @@ public class Player : MonoBehaviour
     public ParticleSystem ps; // 피격 이펙트 파티클 시스템
 
     private CharacterController cc; // 캐릭터 컨트롤러
+    private Animator anim; // 애니메이터 
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -80,6 +82,9 @@ public class Player : MonoBehaviour
         // 이동 방향 설정
         Vector3 dir = new Vector3(h, 0, v);
         dir = dir.normalized; // 정규화
+
+        // 이동 블렌딩 트리 호출하고 벡터의 크기 값 전달
+        anim.SetFloat("MoveMotion", dir.magnitude);
 
         // 메인 카메라를 기준으로 방향을 변환
         dir = Camera.main.transform.TransformDirection(dir);
@@ -141,6 +146,12 @@ public class Player : MonoBehaviour
         // 마우스 왼쪽 클릭
         if (Input.GetMouseButtonDown(0))
         {
+            // 이동 Blend Tree 파라미터 값이 0이면 공격 애니메이션 실행
+            if (anim.GetFloat("MoveMotion") == 0f)
+            {
+                anim.SetTrigger("Attack");
+            }
+
             // ray 생성, 발사 위치, 진행 방향 설정
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
         
