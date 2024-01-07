@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
@@ -30,6 +31,8 @@ public class Enemy : MonoBehaviour
 
     private Animator anim; // 애니메이터
 
+    private NavMeshAgent nav; // 내비게이션 에이전트 변수
+
     public int hp = 15; // 에너미 현재 체력
     public int maxHP = 15; // 에너미 최대 체력
     public int attackPower = 3; // 에너미 공격력
@@ -50,6 +53,7 @@ public class Enemy : MonoBehaviour
         originPos = transform.position;
         originRot = transform.rotation;
         anim = transform.GetComponentInChildren<Animator>();
+        nav = GetComponent<NavMeshAgent>();
     }
 
     void Update()
@@ -117,6 +121,7 @@ public class Enemy : MonoBehaviour
         // 플레이어와의 거리가 공격 범위 밖 -> 플레이어를 향해 이동
         else if (Vector3.Distance(transform.position, player.transform.position) > attackDistance)
         {
+            /*
             // 이동 방향 설정
             Vector3 dir = (player.transform.position - transform.position).normalized;
 
@@ -125,6 +130,17 @@ public class Enemy : MonoBehaviour
 
             // 플레이어를 바라본다
             transform.forward = dir;
+            */
+
+            // 내비게이션 에이전트의 이동을 멈추고 경로를 초기화
+            nav.isStopped = true;
+            nav.ResetPath();
+
+            // 내비게이션으로 접근하는 최소 공격 가능 거리로 설정
+            nav.stoppingDistance = attackDistance;
+
+            // 내비게이션의 목적지를 플레이어의 위치로
+            nav.destination = player.transform.position;
         }
 
         // 그렇지 않으면 현재 상태를 공격으로 전환
@@ -185,16 +201,28 @@ public class Enemy : MonoBehaviour
         // 초기 위치에서의 거리가 0.1 이상이면 초기 위치로 이동
         if (Vector3.Distance(transform.position, originPos) > 0.1f)
         {
+            /*
             Vector3 dir = (originPos - transform.position).normalized;
             cc.Move(dir * moveSpeed * Time.deltaTime);
 
             // 방향을 복귀 지점으로
             transform.forward = dir;
+            */
+
+            // 내비게이션의 목적지를 초기 위치로 설정
+            nav.destination = originPos;
+
+            // 내비게이션으로 접근하는 최소 거리를 0으로 설정
+            nav.stoppingDistance = 0;
         }
 
         // 현재 위치가 초기 위치라면 (복귀 완료)
         else
         {
+            // 내비게이션 이동을 멈추고 경로 초기화
+            nav.isStopped = true;
+            nav.ResetPath();
+
             transform.position = originPos;
             transform.rotation = originRot;
 
@@ -234,6 +262,10 @@ public class Enemy : MonoBehaviour
         }
 
         hp -= damage;
+
+        // 내비게이션 이동 멈추고 경로 초기화
+        nav.isStopped = true;
+        nav.ResetPath();
 
         // 체력이 아직 남아있으면
         if (hp > 0)
