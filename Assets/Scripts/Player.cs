@@ -33,6 +33,8 @@ public class Player : MonoBehaviour
     public GameObject bulletEffect; // 총알 피격 이펙트
     public GameObject hitEffect; // 피격 효과 UI 오브젝트
 
+    public GameObject[] eff_Flash; // 사격 효과 오브젝트 배열
+
     public Slider hpSlider; // hp 슬라이더 변수
     public Text wModeText; // 무기 모드 텍스트
 
@@ -202,6 +204,9 @@ public class Player : MonoBehaviour
                 anim.SetTrigger("Attack");
             }
 
+            // 사격 이펙트 실행
+            StartCoroutine(shootEffectOn(0.05f));
+
             // ray 생성, 발사 위치, 진행 방향 설정
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
         
@@ -258,5 +263,20 @@ public class Player : MonoBehaviour
 
         // 피격 UI 비활성화
         hitEffect.SetActive(false);
+    }
+
+    // 사격 효과 코루틴
+    IEnumerator shootEffectOn(float duration)
+    {
+        // 랜덤 숫자 생성 (0 ~ 배열 크기)
+        int num = Random.Range(0, eff_Flash.Length);
+
+        // 해당 이펙트 활성화
+        eff_Flash[num].SetActive(true);
+
+        // duration 만큼 대기 후 다시 이펙트 비활성화
+        yield return new WaitForSeconds(duration);
+
+        eff_Flash[num].SetActive(false);
     }
 }
