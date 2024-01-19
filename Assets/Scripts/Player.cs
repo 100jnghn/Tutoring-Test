@@ -5,6 +5,13 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    enum WeaponMode
+    {
+        Normal,
+        Sniper
+    }
+    WeaponMode wMode;
+
     public int hp = 100; // 플레이어 체력
     public int maxHP = 100; // 플레이어 최대 체력
     public int weaponPower = 5; // 발사 무기 공격력
@@ -19,6 +26,7 @@ public class Player : MonoBehaviour
     private float mx = 0; // 회전 값
     private float gravity = -20f; // 중력 값
     private float yVelocity = 0f; // 수직 속력 변수
+    private bool zoomMode = false;
 
     public GameObject firePosition; // 발사 위치
     public GameObject bombFactory; // 폭탄 오브젝트
@@ -26,6 +34,7 @@ public class Player : MonoBehaviour
     public GameObject hitEffect; // 피격 효과 UI 오브젝트
 
     public Slider hpSlider; // hp 슬라이더 변수
+    public Text wModeText; // 무기 모드 텍스트
 
     public ParticleSystem ps; // 피격 이펙트 파티클 시스템
 
@@ -36,6 +45,7 @@ public class Player : MonoBehaviour
     {
         cc = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
+        wMode = WeaponMode.Normal;
     }
 
     void Update()
@@ -51,6 +61,26 @@ public class Player : MonoBehaviour
         doJump(); // Spacebar로 점프
         doFire(); // 마우스 입력으로 무기 사용
         doSetHP(); // hp UI 관리
+        doSetMode(); // 모드 변경
+    }
+
+    // sniper, normal 모드 변경
+    void doSetMode()
+    {
+        // 숫자1 입력 : normal모드
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            wMode = WeaponMode.Normal;
+            Camera.main.fieldOfView = 60f;
+
+            wModeText.text = "Normal Mode";
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            wMode = WeaponMode.Sniper;
+
+            wModeText.text = "Sniper Mode";
+        }
     }
 
     // UI - HP 관리
@@ -130,17 +160,37 @@ public class Player : MonoBehaviour
         // 마우스 오른쪽 클릭
         if (Input.GetMouseButtonDown(1))
         {
-            // 폭탄 오브젝트 생성
-            GameObject bomb = Instantiate(bombFactory);
+            switch(wMode)
+            {
+                case WeaponMode.Normal:
+                    // 폭탄 오브젝트 생성
+                    GameObject bomb = Instantiate(bombFactory);
 
-            // 폭탄 생성 위치는 firePosition이다
-            bomb.transform.position = firePosition.transform.position;
+                    // 폭탄 생성 위치는 firePosition이다
+                    bomb.transform.position = firePosition.transform.position;
 
-            // 폭탄 오브젝트의 Rigidbody를 가져옴
-            Rigidbody rbBomb = bomb.GetComponent<Rigidbody>();
+                    // 폭탄 오브젝트의 Rigidbody를 가져옴
+                    Rigidbody rbBomb = bomb.GetComponent<Rigidbody>();
 
-            // rigidbody에 카메라의 정면 방향으로 물리적인 힘을가해준다
-            rbBomb.AddForce(Camera.main.transform.forward * throwPower, ForceMode.Impulse);
+                    // rigidbody에 카메라의 정면 방향으로 물리적인 힘을가해준다
+                    rbBomb.AddForce(Camera.main.transform.forward * throwPower, ForceMode.Impulse);
+
+                    break;
+
+                case WeaponMode.Sniper:
+                    if (!zoomMode) // 저격 모드가 아니라면 저격 모드로 변경
+                    {
+                        Camera.main.fieldOfView = 15f;
+                        zoomMode = true;
+                    }
+                    else // 저격 모드라면 일반 모드로 변경
+                    {
+                        Camera.main.fieldOfView = 60f;
+                        zoomMode = false;
+                    }
+
+                    break;
+            }  
         }
 
         // 마우스 왼쪽 클릭
